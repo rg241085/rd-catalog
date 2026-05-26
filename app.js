@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, updateDoc, deleteDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+// Nayi line notification ke liye
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDkW8QBHruMzQztReP3XmGU5sz8MwSlYEU",
@@ -14,6 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const messaging = getMessaging(app); // Notification chalu karna
 
 // ==========================================
 // 1. FULL SCREEN SLIDER & SWIPE LOGIC
@@ -259,22 +262,22 @@ function createCardHTML(lot, docId, isAdmin) {
 const fetchStockData = (container, isAdmin) => {
     if (!container) return;
     container.innerHTML = "<p style='text-align:center;'>Loading Catalog...</p>";
-    
+
     try {
         const q = query(collection(db, "stock_lots"), orderBy("order", "asc"));
-        
+
         onSnapshot(q, (querySnapshot) => {
             container.innerHTML = "";
-            window.allLotsMedia = {}; 
+            window.allLotsMedia = {};
 
             // NAYA LOGIC: Total products ginn kar screen par dikhana
             const totalCount = querySnapshot.size;
-            
+
             const adminCountElement = document.getElementById("totalAdminCount");
-            if(adminCountElement) adminCountElement.innerText = `Total Products: ${totalCount}`;
-            
+            if (adminCountElement) adminCountElement.innerText = `Total Products: ${totalCount}`;
+
             const customerCountElement = document.getElementById("totalCustomerCount");
-            if(customerCountElement) customerCountElement.innerText = `Total Products: ${totalCount}`;
+            if (customerCountElement) customerCountElement.innerText = `Total Products: ${totalCount}`;
 
             if (querySnapshot.empty) {
                 container.innerHTML = "<p style='text-align:center;'>Koi product available nahi hai.</p>";
@@ -289,7 +292,7 @@ const fetchStockData = (container, isAdmin) => {
                 document.querySelectorAll(".edit-btn").forEach(btn => {
                     btn.addEventListener("click", async (e) => {
                         const id = e.target.getAttribute("data-id");
-                        
+
                         const newOrder = prompt("Naya Display Order Number:", e.target.getAttribute("data-order"));
                         const newItem = prompt("Naya Item Name:", e.target.getAttribute("data-item"));
                         const newLot = prompt("Naya Lot Number:", e.target.getAttribute("data-lot"));
@@ -305,7 +308,7 @@ const fetchStockData = (container, isAdmin) => {
                                 if (mediaArray.length > 1) {
                                     const swapCheck = prompt("Kya aap is product ki photos/videos ka order aapas me badalna (swap) chahte hain? (Type 'yes' to swap, else press Enter):");
                                     if (swapCheck && swapCheck.toLowerCase() === 'yes') {
-                                        mediaArray.reverse(); 
+                                        mediaArray.reverse();
                                     }
                                 }
 
@@ -338,7 +341,7 @@ const fetchStockData = (container, isAdmin) => {
             console.error(error);
             container.innerHTML = "<p style='text-align:center;'>Data load nahi ho paya.</p>";
         });
-        
+
     } catch (error) {
         console.error(error);
         container.innerHTML = "<p style='text-align:center;'>Setup error.</p>";
@@ -347,3 +350,23 @@ const fetchStockData = (container, isAdmin) => {
 
 if (document.getElementById("adminStockContainer")) fetchStockData(document.getElementById("adminStockContainer"), true);
 if (document.getElementById("stockContainer")) fetchStockData(document.getElementById("stockContainer"), false);
+// ==========================================
+// 5. PUSH NOTIFICATION PERMISSION LOGIC
+// ==========================================
+function requestNotificationPermission() {
+    console.log('Notification permission maang rahe hain...');
+    Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+            console.log('Permission mil gayi!');
+            // Yahan hum VAPID key dalenge (Step 3 mein)
+        } else {
+            console.log('Customer ne notification block kar di.');
+        }
+    });
+}
+
+// Jab customer RD Catalog khole toh permission maangna
+if (document.getElementById("stockContainer")) {
+    // Thoda delay dekar poochte hain taaki customer ekdum se confuse na ho
+    setTimeout(requestNotificationPermission, 3000);
+}
