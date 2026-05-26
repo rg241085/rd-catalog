@@ -2,8 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, updateDoc, deleteDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 // Nayi line notification ke liye
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
-
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 const firebaseConfig = {
     apiKey: "AIzaSyDkW8QBHruMzQztReP3XmGU5sz8MwSlYEU",
     authDomain: "rd-catalog.firebaseapp.com",
@@ -385,3 +384,9 @@ function requestNotificationPermission() {
 if (document.getElementById("stockContainer")) {
     setTimeout(requestNotificationPermission, 3000);
 }
+
+// Jab app screen par khuli ho tab notification dikhana
+onMessage(messaging, (payload) => {
+    console.log('App khuli hone par message aaya: ', payload);
+    alert(`🔔 Naya Alert: ${payload.notification.title}\n${payload.notification.body}`);
+});
