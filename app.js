@@ -353,32 +353,75 @@ if (document.getElementById("stockContainer")) fetchStockData(document.getElemen
 // ==========================================
 // 5. PUSH NOTIFICATION PERMISSION LOGIC
 // ==========================================
-function requestNotificationPermission() {
-    console.log('Notification permission maang rahe hain...');
 
+
+
+
+// function requestNotificationPermission() {
+//     console.log('Notification permission maang rahe hain...');
+
+//     Notification.requestPermission().then((permission) => {
+//         if (permission === 'granted') {
+//             console.log('Permission mil gayi! Ab token bana rahe hain...');
+
+//             // YAHAN APNI COPY KI HUI KEY PASTE KAREIN
+//             const myVapidKey = "BIDCVcTjmz46lSKycxQxPRJ5IIiAc8tLmdT088ViaQBn1Im2uKNeJfKKfpRSpFPTFM4QX92hBLbePT30xRDpLVM";
+
+//             getToken(messaging, { vapidKey: myVapidKey }).then((currentToken) => {
+//                 if (currentToken) {
+//                     console.log('Customer ka Notification Token ban gaya:', currentToken);
+//                     // Token successfully generate ho gaya hai!
+//                 } else {
+//                     console.log('Token nahi mil paya.');
+//                 }
+//             }).catch((err) => {
+//                 console.log('Token laane mein error:', err);
+//             });
+
+//         } else {
+//             console.log('Customer ne notification block kar di.');
+//         }
+//     });
+// }
+
+
+
+// ==========================================
+// 5. PUSH NOTIFICATION PERMISSION LOGIC (Debug Mode)
+// ==========================================
+function requestNotificationPermission() {
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
-            console.log('Permission mil gayi! Ab token bana rahe hain...');
-
-            // YAHAN APNI COPY KI HUI KEY PASTE KAREIN
-            const myVapidKey = "BIDCVcTjmz46lSKycxQxPRJ5IIiAc8tLmdT088ViaQBn1Im2uKNeJfKKfpRSpFPTFM4QX92hBLbePT30xRDpLVM";
-
+            
+            // YAHAN APNI VAPID KEY WAPAS DAALEIN
+            const myVapidKey = "BIDCVcTjmz46lSKycxQxPRJ5IIiAc8tLmdT088ViaQBn1Im2uKNeJfKKfpRSpFPTFM4QX92hBLbePT30xRDpLVM"; 
+            
             getToken(messaging, { vapidKey: myVapidKey }).then((currentToken) => {
-                if (currentToken) {
-                    console.log('Customer ka Notification Token ban gaya:', currentToken);
-                    // Token successfully generate ho gaya hai!
-                } else {
-                    console.log('Token nahi mil paya.');
-                }
+              if (currentToken) {
+                // Agar token mil gaya toh screen par success popup aayega
+                alert('Success! Notification Token mil gaya hai. Ab Firebase se message bhejein.');
+              } else {
+                alert('Error: Token nahi ban paya. Firebase setting check karein.');
+              }
             }).catch((err) => {
-                console.log('Token laane mein error:', err);
+              // Agar VAPID key ya kisi aur cheez mein galti hogi toh yahan error dikhega
+              alert('Token laane mein Error aayi: ' + err.message);
             });
-
+            
         } else {
-            console.log('Customer ne notification block kar di.');
+            alert('Aapne notification block kar di hai. Kripya browser setting se allow karein.');
         }
     });
 }
+
+if (document.getElementById("stockContainer")) {
+    setTimeout(requestNotificationPermission, 3000); 
+}
+
+
+
+
+
 
 // Jab customer RD Catalog khole toh 3 second baad permission maangna
 if (document.getElementById("stockContainer")) {
