@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Media Order Control</title>
+
+    <link rel="manifest" href="manifest-admin.json">
+    <meta name="theme-color" content="#1a73e8">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .max-width-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .file-box {
+            background: #f8f9fa;
+            padding: 10px;
+            border: 1px dashed #bbb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button:disabled {
+            background: #cccccc;
+        }
+
+        hr {
+            margin: 40px 0;
+            border: 0;
+            border-top: 1px solid #ccc;
+        }
+
+        .media-gallery {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .media-item {
+            height: 180px;
+            width: 140px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #000;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #mediaModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #modalClose {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 35px;
+            cursor: pointer;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+        }
+
+        /* Modal Slider Navigation Arrows */
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 35px;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            user-select: none;
+            z-index: 10001;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px;
+            height: 30px;
+        }
+
+        #prevBtn {
+            left: 15px;
+        }
+
+        #nextBtn {
+            right: 15px;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <div class="max-width-container">
+        <h2>Add New Lot (With Media Order)</h2>
+        <form id="uploadForm">
+            <label><strong>Display Order Number (App me kis nambar par dikhe):</strong></label>
+            <input type="number" id="lotOrder" value="1" required>
+
+            <label><strong>1. Item Name:</strong></label>
+            <input type="text" id="itemName" placeholder="e.g. Kishmish Golden" required>
+
+            <label><strong>2. Lot Number:</strong></label>
+            <input type="text" id="lotNumber" placeholder="e.g. Lot 105" required>
+
+            <label><strong>3. Available Quantity (Boxes/Kg):</strong></label>
+            <input type="number" id="lotQuantity" placeholder="e.g. 100" required>
+
+            <label><strong>4. Rate (Per Box/Kg):</strong></label>
+            <input type="text" id="lotRate" placeholder="e.g. 280 / On Call" required>
+
+            <div class="file-box">
+                <label><strong>Slot 1 (Ye Photo/Video sabse pehle dikhegi):</strong></label>
+                <input type="file" id="mediaSlot1" accept="image/*,video/*" required>
+            </div>
+
+            <div class="file-box">
+                <label><strong>Slot 2 (Ye doosre nambar par dikhegi - Optional):</strong></label>
+                <input type="file" id="mediaSlot2" accept="image/*,video/*">
+            </div>
+
+            <div class="file-box">
+                <label><strong>Slot 3 (Ye teesre nambar par dikhegi - Optional):</strong></label>
+                <input type="file" id="mediaSlot3" accept="image/*,video/*">
+            </div>
+
+            <button type="submit" id="submitBtn">Upload Product</button>
+
+            <div id="uploadStatus" style="display: none; margin-top: 15px;">
+                <p id="uploadText" style="margin: 0 0 5px 0; font-weight: bold; color: #007bff; font-size: 14px;">
+                    Uploading...</p>
+                <div style="width: 100%; background: #e0e0e0; border-radius: 8px; overflow: hidden;">
+                    <div id="progressBar" style="width: 0%; height: 12px; background: #25D366; transition: width 0.3s;">
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <hr>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin: 0;">Live Stock Manager</h2>
+            <span id="totalAdminCount"
+                style="background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">Total
+                Products: 0</span>
+        </div>
+
+        <div id="adminStockContainer"></div>
+
+        <div id="mediaModal">
+            <span id="modalClose" onclick="closeModal()">&times;</span>
+            <div id="prevBtn" class="modal-nav" onclick="changeMedia(-1)">&#10094;</div>
+            <div id="nextBtn" class="modal-nav" onclick="changeMedia(1)">&#10095;</div>
+
+            <div id="modalBody"
+                style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            </div>
+        </div>
+
+        <script type="module" src="app.js"></script>
+</body>
+
+</html>
