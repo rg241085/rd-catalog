@@ -1,8 +1,14 @@
-// Firebase ke background scripts import karna
+// ===================================================
+// 1. APP VERSION CONTROL (JAB BHI KUCH BADLEIN, YE NUMBER BADAL DEIN)
+// ===================================================
+const CACHE_VERSION = 'rd-catalog-v1';
+
+// ===================================================
+// 2. FIREBASE PUSH NOTIFICATION CODE
+// ===================================================
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
-// Aapka Firebase Configuration
 firebase.initializeApp({
     apiKey: "AIzaSyDkW8QBHruMzQztReP3XmGU5sz8MwSlYEU",
     authDomain: "rd-catalog.firebaseapp.com",
@@ -14,16 +20,47 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Jab app band ho tab notification dikhane ka code
 messaging.onBackgroundMessage((payload) => {
     console.log('Background notification aayi: ', payload);
-
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: 'logo.png', // Aapki app ka logo
+        icon: 'logo.png',
         badge: 'logo.png'
     };
-
     self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// ===================================================
+// 3. AUTO-UPDATE & CACHE CLEARING LOGIC
+// ===================================================
+
+// Install hote hi naye code ko activate kar de (skip waiting)
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+// Purana Cache Delete karne ka logic
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    // Agar phone mein purana version hai, toh use uda do
+                    if (cache !== CACHE_VERSION) {
+                        console.log('Purana cache delete ho gaya: ', cache);
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        })
+    );
+    return self.clients.claim(); // Turant naye code ka control le le
+});
+
+// Hamesha naya data internet se laane ki koshish kare
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        fetch(event.request).catch(() => caches.match(event.request))
+    );
 });
