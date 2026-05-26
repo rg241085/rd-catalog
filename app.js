@@ -351,22 +351,37 @@ const fetchStockData = (container, isAdmin) => {
 if (document.getElementById("adminStockContainer")) fetchStockData(document.getElementById("adminStockContainer"), true);
 if (document.getElementById("stockContainer")) fetchStockData(document.getElementById("stockContainer"), false);
 // ==========================================
+// ==========================================
 // 5. PUSH NOTIFICATION PERMISSION LOGIC
 // ==========================================
 function requestNotificationPermission() {
     console.log('Notification permission maang rahe hain...');
+
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
-            console.log('Permission mil gayi!');
-            // Yahan hum VAPID key dalenge (Step 3 mein)
+            console.log('Permission mil gayi! Ab token bana rahe hain...');
+
+            // YAHAN APNI COPY KI HUI KEY PASTE KAREIN
+            const myVapidKey = "BIDCVcTjmz46lSKycxQxPRJ5IIiAc8tLmdT088ViaQBn1Im2uKNeJfKKfpRSpFPTFM4QX92hBLbePT30xRDpLVM";
+
+            getToken(messaging, { vapidKey: myVapidKey }).then((currentToken) => {
+                if (currentToken) {
+                    console.log('Customer ka Notification Token ban gaya:', currentToken);
+                    // Token successfully generate ho gaya hai!
+                } else {
+                    console.log('Token nahi mil paya.');
+                }
+            }).catch((err) => {
+                console.log('Token laane mein error:', err);
+            });
+
         } else {
             console.log('Customer ne notification block kar di.');
         }
     });
 }
 
-// Jab customer RD Catalog khole toh permission maangna
+// Jab customer RD Catalog khole toh 3 second baad permission maangna
 if (document.getElementById("stockContainer")) {
-    // Thoda delay dekar poochte hain taaki customer ekdum se confuse na ho
     setTimeout(requestNotificationPermission, 3000);
 }
