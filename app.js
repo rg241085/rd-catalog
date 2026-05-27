@@ -402,7 +402,7 @@ function requestNotificationPermission() {
                     serviceWorkerRegistration: registration // Ye line Firebase ko sahi rasta dikhayegi
                 }).then((currentToken) => {
                     if (currentToken) {
-                        alert('Success! Notification Token mil gaya hai. Ab Firebase se message bhejein.');
+                        // alert('Success! Notification Token mil gaya hai. Ab Firebase se message bhejein.');
                     } else {
                         alert('Error: Token nahi ban paya.');
                     }
