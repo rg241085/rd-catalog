@@ -385,37 +385,41 @@ if (document.getElementById("stockContainer")) fetchStockData(document.getElemen
 // }
 
 
-
 // ==========================================
 // 5. PUSH NOTIFICATION PERMISSION LOGIC (Debug Mode)
 // ==========================================
 function requestNotificationPermission() {
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
-            
-            // YAHAN APNI VAPID KEY WAPAS DAALEIN
-            const myVapidKey = "BIDCVcTjmz46lSKycxQxPRJ5IIiAc8tLmdT088ViaQBn1Im2uKNeJfKKfpRSpFPTFM4QX92hBLbePT30xRDpLVM"; 
-            
-            getToken(messaging, { vapidKey: myVapidKey }).then((currentToken) => {
-              if (currentToken) {
-                // Agar token mil gaya toh screen par success popup aayega
-                alert('Success! Notification Token mil gaya hai. Ab Firebase se message bhejein.');
-              } else {
-                alert('Error: Token nahi ban paya. Firebase setting check karein.');
-              }
-            }).catch((err) => {
-              // Agar VAPID key ya kisi aur cheez mein galti hogi toh yahan error dikhega
-              alert('Token laane mein Error aayi: ' + err.message);
+
+            const myVapidKey = "BIDCVcTjmz46lSKycxQxPRJ5IIiAc8tLmdT088ViaQBn1Im2uKNeJfKKfpRSpFPTFM4QX92hBLbePT30xRDpLVM";
+
+            // NAYA BADLAV: Firebase ko bata rahe hain ki hamari file 'sw.js' hai
+            navigator.serviceWorker.register('sw.js').then((registration) => {
+
+                getToken(messaging, {
+                    vapidKey: myVapidKey,
+                    serviceWorkerRegistration: registration // Ye line Firebase ko sahi rasta dikhayegi
+                }).then((currentToken) => {
+                    if (currentToken) {
+                        alert('Success! Notification Token mil gaya hai. Ab Firebase se message bhejein.');
+                    } else {
+                        alert('Error: Token nahi ban paya.');
+                    }
+                }).catch((err) => {
+                    alert('Token laane mein Error aayi: ' + err.message);
+                });
+
             });
-            
+
         } else {
-            alert('Aapne notification block kar di hai. Kripya browser setting se allow karein.');
+            alert('Aapne notification block kar di hai.');
         }
     });
 }
 
 if (document.getElementById("stockContainer")) {
-    setTimeout(requestNotificationPermission, 3000); 
+    setTimeout(requestNotificationPermission, 3000);
 }
 
 
