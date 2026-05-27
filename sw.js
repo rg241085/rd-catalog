@@ -1,7 +1,7 @@
 // ===================================================
 // 1. APP VERSION CONTROL (JAB BHI KUCH BADLEIN, YE NUMBER BADAL DEIN)
 // ===================================================
-const CACHE_VERSION = 'rd-catalog-v4';
+const CACHE_VERSION = 'rd-catalog-v5';
 
 // ===================================================
 // 2. FIREBASE PUSH NOTIFICATION CODE
@@ -22,13 +22,8 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
     console.log('Background notification aayi: ', payload);
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: 'logo.png',
-        badge: 'logo.png'
-    };
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    // Humne niche ka code hata diya hai kyunki Firebase Console 
+    // se bheje gaye messages ko Firebase khud screen par dikha deta hai.
 });
 
 // ===================================================
