@@ -1,7 +1,7 @@
 // ===================================================
 // 1. APP VERSION CONTROL (JAB BHI KUCH BADLEIN, YE NUMBER BADAL DEIN)
 // ===================================================
-const CACHE_VERSION = 'rd-catalog-v6';
+const CACHE_VERSION = 'rd-catalog-v7';
 
 // ===================================================
 // 2. FIREBASE PUSH NOTIFICATION CODE
