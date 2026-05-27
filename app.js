@@ -395,27 +395,27 @@ if (document.getElementById("stockContainer")) fetchStockData(document.getElemen
 function requestNotificationPermission() {
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
-
             const myVapidKey = "BIDCVcTjmz46lSKycxQxPRJ5IIiAc8tLmdT088ViaQBn1Im2uKNeJfKKfpRSpFPTFM4QX92hBLbePT30xRDpLVM";
 
-            // NAYA BADLAV: Firebase ko bata rahe hain ki hamari file 'sw.js' hai
             navigator.serviceWorker.register('sw.js').then((registration) => {
-
                 getToken(messaging, {
                     vapidKey: myVapidKey,
-                    serviceWorkerRegistration: registration // Ye line Firebase ko sahi rasta dikhayegi
-                }).then((currentToken) => {
+                    serviceWorkerRegistration: registration
+                }).then(async (currentToken) => {
                     if (currentToken) {
-                        // alert('Success! Notification Token mil gaya hai. Ab Firebase se message bhejein.');
+                        // ✅ Cloud Function se Topic Subscribe karo
+                        const { getFunctions, httpsCallable } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js");
+                        const functions = getFunctions(app);
+                        const subscribe = httpsCallable(functions, 'subscribeToTopic');
+                        await subscribe({ token: currentToken });
+                        console.log("Topic subscribe ho gaya!");
                     } else {
                         alert('Error: Token nahi ban paya.');
                     }
                 }).catch((err) => {
                     alert('Token laane mein Error aayi: ' + err.message);
                 });
-
             });
-
         } else {
             alert('Aapne notification block kar di hai.');
         }
