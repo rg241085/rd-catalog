@@ -1,7 +1,7 @@
 // ===================================================
 // 1. APP VERSION CONTROL (JAB BHI KUCH BADLEIN, YE NUMBER BADAL DEIN)
 // ===================================================
-const CACHE_VERSION = 'rd-catalog-v5';
+const CACHE_VERSION = 'rd-catalog-v6';
 
 // ===================================================
 // 2. FIREBASE PUSH NOTIFICATION CODE
@@ -55,5 +55,32 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         fetch(event.request).catch(() => caches.match(event.request))
+    );
+});
+
+// ===================================================
+// 4. NOTIFICATION PAR CLICK HONE KA LOGIC
+// ===================================================
+self.addEventListener('notificationclick', function (event) {
+    // 1. Click karte hi notification ko upar se hata do
+    event.notification.close();
+
+    // 2. Customer panel ka link jahan user ko bhejna hai
+    const urlToOpen = 'https://rg241085.github.io/rd-catalog/code.html';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // Agar customer ne app pehle se minimize kar rakhi hai, toh use samne (focus) le aao
+            for (let i = 0; i < windowClients.length; i++) {
+                let client = windowClients[i];
+                if (client.url.includes('/code.html') && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // Agar app poori tarah band hai, toh app ko naye sire se khol do
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
     );
 });
