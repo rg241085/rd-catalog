@@ -1,7 +1,7 @@
 // ===================================================
 // 1. APP VERSION CONTROL (JAB BHI KUCH BADLEIN, YE NUMBER BADAL DEIN)
 // ===================================================
-const CACHE_VERSION = 'rd-catalog-v3';
+const CACHE_VERSION = 'rd-catalog-v4';
 
 // ===================================================
 // 2. FIREBASE PUSH NOTIFICATION CODE
@@ -46,16 +46,14 @@ self.addEventListener('activate', (event) => {
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cache => {
-                    // Agar phone mein purana version hai, toh use uda do
                     if (cache !== CACHE_VERSION) {
                         console.log('Purana cache delete ho gaya: ', cache);
                         return caches.delete(cache);
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim()) // <-- Ab yeh sahi timing par control lega
     );
-    return self.clients.claim(); // Turant naye code ka control le le
 });
 
 // Hamesha naya data internet se laane ki koshish kare

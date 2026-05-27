@@ -180,7 +180,7 @@ if (uploadForm) {
 
             alert("Product unke sahi media order ke sath upload ho gaya hai! 🎉");
             uploadForm.reset();
-            if (typeof fetchStockData === "function") fetchStockData(document.getElementById("adminStockContainer"), true);
+            // if (typeof fetchStockData === "function") fetchStockData(document.getElementById("adminStockContainer"), true);
 
         } catch (error) {
             console.error(error);
@@ -202,7 +202,7 @@ function createCardHTML(lot, docId, isAdmin) {
     window.allLotsMedia[docId] = lot.media;
 
     let mediaHTML = `<div class="media-gallery">`;
-    lot.media.forEach((item, index) => {
+    (lot.media || []).forEach((item, index) => {
         if (item.type === 'video') {
             // Yahan openModal mein docId aur index dono bhej rahe hain
             mediaHTML += `<video src="${item.url}" class="media-item" onclick="openModal('${docId}', ${index})" autoplay loop muted playsinline></video>`;
@@ -283,9 +283,13 @@ const fetchStockData = (container, isAdmin) => {
                 return;
             }
 
+            let allHTML = ""; // Ek khali jagah (trolley) banayi
             querySnapshot.forEach((docSnap) => {
-                container.innerHTML += createCardHTML(docSnap.data(), docSnap.id, isAdmin);
+                // Saare cards ko trolley mein dalte gaye
+                allHTML += createCardHTML(docSnap.data(), docSnap.id, isAdmin);
             });
+            // Loop khatam hone ke baad ek hi baar mein screen par dikha diya
+            container.innerHTML = allHTML;
 
             if (isAdmin) {
                 document.querySelectorAll(".edit-btn").forEach(btn => {
@@ -418,9 +422,7 @@ function requestNotificationPermission() {
     });
 }
 
-if (document.getElementById("stockContainer")) {
-    setTimeout(requestNotificationPermission, 3000);
-}
+
 
 
 
